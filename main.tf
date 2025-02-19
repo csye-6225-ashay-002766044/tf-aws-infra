@@ -1,14 +1,8 @@
-provider "aws" {
-  region  = var.aws_region
-  profile = "dev"
-}
-
 # Create VPC
 resource "aws_vpc" "main_vpc" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
-
   tags = {
     Name = "MyVPC"
   }
@@ -77,7 +71,6 @@ resource "aws_route" "public_route" {
 # Create Private Route Table
 resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.main_vpc.id
-
   tags = {
     Name = "Private-Route-Table"
   }
