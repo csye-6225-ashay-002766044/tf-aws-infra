@@ -1,0 +1,29 @@
+name: Terraform CI
+
+on:
+  pull_request:  # Runs on every new PR
+    branches:
+      - main     # Change this if your main branch has a different name
+
+jobs:
+  terraform:
+    name: Terraform CI Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0  # Ensure Terraform version matches your setup
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Check Terraform Formatting
+        run: terraform fmt -check -recursive
+
+      - name: Validate Terraform Configuration
+        run: terraform validate
