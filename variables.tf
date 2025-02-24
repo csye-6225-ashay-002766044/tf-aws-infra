@@ -1,4 +1,4 @@
-variable "aws_profile" {
+variable "aws_profileee" {
   description = "AWS CLI Profile dev or demo"
   type        = string
   default     = "dev"
