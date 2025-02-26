@@ -83,3 +83,84 @@ resource "aws_route_table_association" "private_assoc" {
   subnet_id      = aws_subnet.private_subnets[count.index].id
   route_table_id = aws_route_table.private_rt.id
 }
+
+# Application Security Group
+resource "aws_security_group" "app_sg" {
+  vpc_id = aws_vpc.main_vpc.id
+
+  # Allow SSH, HTTP, HTTPS, and application port from anywhere
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = var.app_port
+    to_port     = var.app_port
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Deny database access from outside the instance
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["127.0.0.1/32"]
+  }
+
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["127.0.0.1/32"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.vpc_name}-App-SG"
+  }
+}
+
+# EC2 Instance using Custom AMI
+resource "aws_instance" "app_instance" {
+  ami                    = var.custom_ami_id
+  instance_type          = "t2.micro"
+  subnet_id              = aws_subnet.public_subnets[0].id
+  vpc_security_group_ids = [aws_security_group.app_sg.id]
+
+  root_block_device {
+    volume_size           = 25
+    volume_type           = "gp2"
+    delete_on_termination = true
+  }
+
+  disable_api_termination = false
+
+  tags = {
+    Name = "${var.vpc_name}-App-Instance"
+  }
+}
+
