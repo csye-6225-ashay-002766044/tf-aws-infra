@@ -146,10 +146,22 @@ resource "aws_security_group" "app_sg" {
 
 # EC2 Instance using Custom AMI
 resource "aws_instance" "app_instance" {
-  ami                    = var.custom_ami_id
-  instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.public_subnets[0].id
-  vpc_security_group_ids = [aws_security_group.app_sg.id]
+  ami                         = var.custom_ami_id
+  instance_type               = "t2.micro"
+  subnet_id                   = aws_subnet.public_subnets[0].id
+  vpc_security_group_ids      = [aws_security_group.app_sg.id]
+  associate_public_ip_address = true
+  user_data                   = <<-EOF
+    #!/bin/bash
+    echo "AWS_REGION=${var.aws_region}" >> /opt/webapp/.env
+    echo "S3_BUCKET_NAME=${aws_s3_bucket.webapp_bucket.id}" >> /opt/webapp/.env
+    echo "DB_HOST=$(echo ${aws_db_instance.webapp_rds.endpoint} | cut -d ':' -f 1)" >> /opt/webapp/.env
+    echo "DB_NAME=csye6225" >> /opt/webapp/.env
+    echo "DB_USER=csye6225" >> /opt/webapp/.env
+    echo "DB_PASSWORD=${var.db_password}" >> /opt/webapp/.env
+    echo "AWS_ACCESS_KEY_ID=${var.AWS_ACCESS_KEY_ID}" >> /opt/webapp/.env
+    echo "AWS_SECRET_ACCESS_KEY=${var.AWS_SECRET_ACCESS_KEY}" >> /opt/webapp/.env
+  EOF
 
   root_block_device {
     volume_size           = 25
