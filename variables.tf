@@ -71,3 +71,33 @@ variable "ssh_username" {
   type        = string
   default     = "ec2-user"
 }
+
+variable "s3_bucket_name" {
+  type    = string
+  default = "my-webapp-bucket" # This can be dynamically generated
+}
+
+variable "db_password" {
+  description = "Database password for RDS instance"
+  type        = string
+  sensitive   = true
+}
+
+variable "aws_dev_id" {
+  description = "AWS dev id"
+  type        = string
+  sensitive   = true
+}
+
+variable "AWS_ACCESS_KEY_ID" {
+  description = "AWS access key id"
+  type        = string
+  sensitive   = true
+}
+variable "AWS_SECRET_ACCESS_KEY" {
+  description = "AWS secret access key"
+  type        = string
+  sensitive   = true
+}
+
+
