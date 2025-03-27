@@ -59,11 +59,12 @@ variable "custom_ami_id" {
   type        = string
 }
 
-# Source AMI for Packer Build
-variable "source_ami" {
-  description = "Source AMI for building a custom image"
-  type        = string
-}
+# # Source AMI for Packer Build
+# variable "source_ami" {
+#   description = "Source AMI for building a custom image"
+#   type        = string
+#   default     = "default"
+# }
 
 # SSH Username
 variable "ssh_username" {
@@ -89,15 +90,15 @@ variable "aws_dev_id" {
   sensitive   = true
 }
 
-variable "AWS_ACCESS_KEY_ID" {
-  description = "AWS access key id"
-  type        = string
-  sensitive   = true
-}
-variable "AWS_SECRET_ACCESS_KEY" {
-  description = "AWS secret access key"
-  type        = string
-  sensitive   = true
-}
+# variable "AWS_ACCESS_KEY_ID" {
+#   description = "AWS access key id"
+#   type        = string
+#   sensitive   = true
+# }
+# variable "AWS_SECRET_ACCESS_KEY" {
+#   description = "AWS secret access key"
+#   type        = string
+#   sensitive   = true
+# }
 
 
