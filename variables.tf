@@ -102,3 +102,21 @@ variable "aws_dev_id" {
 # }
 
 
+# Domain name for Route53
+variable "domain_name" {
+  description = "Domain name for the application"
+  type        = string
+  default     = "yourdomain.com" # Replace with your actual domain
+}
+
+# Environment (dev/demo)
+
+
+# # SSH Key Name
+# variable "key_name" {
+#   description = "Name of the SSH key pair to use for EC2 instances"
+#   type        = string
+#   default     = "your-key-name" # Replace with your actual key name
+# }
+
+

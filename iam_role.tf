@@ -36,3 +36,21 @@ resource "aws_iam_instance_profile" "webapp_combined_profile" {
   name = "webapp_combined_profile"
   role = aws_iam_role.webapp_combined_role.name
 }
+
+# Attach AWS-Managed Route53FullAccess policy
+resource "aws_iam_role_policy_attachment" "attach_route53_policy" {
+  role       = aws_iam_role.webapp_combined_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonRoute53FullAccess"
+}
+
+# Attach AWS-Managed ElasticLoadBalancingFullAccess policy
+resource "aws_iam_role_policy_attachment" "attach_elb_policy" {
+  role       = aws_iam_role.webapp_combined_role.name
+  policy_arn = "arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess"
+}
+
+# Attach AWS-Managed AutoScalingFullAccess policy
+resource "aws_iam_role_policy_attachment" "attach_autoscaling_policy" {
+  role       = aws_iam_role.webapp_combined_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AutoScalingFullAccess"
+}
