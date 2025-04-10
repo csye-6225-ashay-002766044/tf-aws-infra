@@ -118,6 +118,14 @@ resource "aws_autoscaling_group" "webapp_asg" {
 
   target_group_arns = [aws_lb_target_group.webapp_tg.arn]
 
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 90
+      instance_warmup        = 300
+    }
+  }
+
   tag {
     key                 = "Name"
     value               = "WebApp-ASG-Instance"
@@ -183,3 +191,5 @@ resource "aws_cloudwatch_metric_alarm" "cpu_low" {
     AutoScalingGroupName = aws_autoscaling_group.webapp_asg.name
   }
 }
+
+

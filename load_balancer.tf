@@ -48,3 +48,24 @@ resource "aws_lb_listener" "http" {
     target_group_arn = aws_lb_target_group.webapp_tg.arn
   }
 }
+
+# Reference the imported certificate using a data source
+data "aws_acm_certificate" "imported_cert" {
+  domain      = "demo.ashaysaoji.com"
+  statuses    = ["ISSUED"]
+  most_recent = true
+}
+
+# HTTPS Listener for Load Balancer
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.webapp_lb.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = data.aws_acm_certificate.imported_cert.arn
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.webapp_tg.arn
+  }
+}
