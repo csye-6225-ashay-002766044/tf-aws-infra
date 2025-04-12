@@ -2,7 +2,6 @@ locals {
   unique_bucket_name = "${var.s3_bucket_name}-${uuid()}"
 }
 
-
 resource "aws_s3_bucket" "webapp_bucket" {
   bucket        = local.unique_bucket_name
   force_destroy = true
@@ -13,7 +12,6 @@ resource "aws_s3_bucket" "webapp_bucket" {
   }
 }
 
-
 resource "aws_s3_bucket_public_access_block" "public_access" {
   bucket = aws_s3_bucket.webapp_bucket.id
 
@@ -23,14 +21,16 @@ resource "aws_s3_bucket_public_access_block" "public_access" {
   restrict_public_buckets = true
 }
 
-
+# Updated encryption configuration to use KMS
 resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
   bucket = aws_s3_bucket.webapp_bucket.id
 
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      kms_master_key_id = aws_kms_key.s3_kms.arn
+      sse_algorithm     = "aws:kms"
     }
+    bucket_key_enabled = true
   }
 }
 
@@ -50,9 +50,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "lifecycle" {
   }
 }
 
+# Updated IAM policy for S3 access with KMS permissions
 resource "aws_iam_policy" "s3_access_policy" {
   name        = "WebAppS3Policy"
-  description = "Allow EC2 instance to access S3 bucket"
+  description = "Allow EC2 instance to access S3 bucket with KMS encryption"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -70,39 +71,24 @@ resource "aws_iam_policy" "s3_access_policy" {
           "arn:aws:s3:::${aws_s3_bucket.webapp_bucket.id}",
           "arn:aws:s3:::${aws_s3_bucket.webapp_bucket.id}/*"
         ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey",
+          "kms:DescribeKey"
+        ]
+        Resource = [
+          aws_kms_key.s3_kms.arn
+        ]
       }
     ]
   })
 }
 
-# # IAM Role for EC2 instance
-# resource "aws_iam_role" "webapp_role" {
-#   name = "WebAppS3Role"
-
-#   assume_role_policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [{
-#       Effect    = "Allow"
-#       Principal = { Service = "ec2.amazonaws.com" }
-#       Action    = "sts:AssumeRole"
-#     }]
-#   })
-# }
-
-# # Attach IAM Policy to IAM Role
-# resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
-#   role       = aws_iam_role.webapp_role.name
-#   policy_arn = aws_iam_policy.s3_access_policy.arn
-# }
-
-# # IAM Instance Profile for EC2
-# resource "aws_iam_instance_profile" "webapp_profile" {
-#   name = "webapp_profile"
-#   role = aws_iam_role.webapp_role.name
-# }
-
-
-
-
-
-
+# Attach S3 policy to the existing IAM role
+resource "aws_iam_role_policy_attachment" "attach_s3_kms_policy" {
+  role       = aws_iam_role.webapp_combined_role.name
+  policy_arn = aws_iam_policy.s3_access_policy.arn
+}
